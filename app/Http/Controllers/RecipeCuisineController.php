@@ -12,8 +12,8 @@ use App\Traits\CrudApiControllerTrait;
 
 class RecipeCuisineController extends ApiController
 {
-    static public $modelClass = RecipeCuisine::class;
-    static public $transformerClass = RecipeCuisineTransformer::class;
+    public $modelClass = RecipeCuisine::class;
+    public $transformerClass = RecipeCuisineTransformer::class;
 
     // use traits to get around signature conflict issue
     use CrudApiControllerTrait {

@@ -11,8 +11,8 @@ use App\Traits\CrudApiControllerTrait;
 
 class SlugController extends ApiController
 {
-    static public $modelClass = Slug::class;
-    static public $transformerClass = SlugTransformer::class;
+    public $modelClass = Slug::class;
+    public $transformerClass = SlugTransformer::class;
 
     // use traits to get around signature conflict issue
     use CrudApiControllerTrait {

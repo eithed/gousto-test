@@ -2,10 +2,14 @@
 
 namespace App\Services;
 
+use App\Base;
+use App\Exceptions\ClassTransformNotFoundException;
+
 use League\Fractal\Manager;
 use League\Fractal\Resource\Collection as FractalCollection;
 use League\Fractal\Resource\Item as FractalItem;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
+use League\Fractal\TransformerAbstract;
 
 use Illuminate\Support\Facades\App;
 use Illuminate\Database\Eloquent\Collection as Collection;
@@ -19,7 +23,7 @@ class ApiService
         $this->fractal = new Manager();
     }
 
-    public function transform($model, $transformer)
+    public function transform($model, TransformerAbstract $transformer)
     {
         if ($model instanceof Model)
         {
@@ -36,6 +40,10 @@ class ApiService
             $resource = new FractalCollection($model->getCollection(), $transformer);
             $resource->setPaginator(new IlluminatePaginatorAdapter($model));
             $data = $this->fractal->createData($resource)->toArray();
+        }
+        else
+        {
+            throw new ClassTransformNotFoundException();
         }
 
         return response()->json($data);

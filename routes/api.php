@@ -21,7 +21,7 @@ Route::group(['prefix' => Recipe::namespace()], function(){
 	Route::get('/', ['uses' => RecipeController::class."@index"]);
 	Route::get('/{recipe}/', ['uses' => RecipeController::class."@show"]);
 	Route::post('/', ['uses' => RecipeController::class."@store"]);
-	Route::post('/{recipe}/rate', ['uses' => RecipeController::class."@rate"]);
+	Route::post('/{recipe}/review', ['uses' => RecipeController::class."@review"]);
 	Route::put('/{recipe}/', ['uses' => RecipeController::class."@update"]);
 	Route::delete('/{recipe}/', ['uses' => RecipeController::class."@destroy"]);
 });

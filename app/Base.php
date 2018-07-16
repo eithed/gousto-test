@@ -55,6 +55,16 @@ class Base extends Model
      *
      * @return string
      */
+    public function getClassNameAttribute() : string
+    {
+        return $this->className();
+    }
+
+    /**
+     * Helper function to retrieve namespace
+     *
+     * @return string
+     */
     public function getNamespaceAttribute() : string
     {
         return $this->namespace();

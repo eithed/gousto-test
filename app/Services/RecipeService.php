@@ -13,16 +13,19 @@ class RecipeService
 	{
 		$result = $recipe->save();
 
-		$slug = new Slug([
-            'item_id' => $recipe->id,
-            'item_type' => get_class($recipe),
-            'title' => $request->get('slug')
-        ]);
-
-        $slug->save();
-
         if (!$result)
         	return false;
+
+        if (!empty($request->get('slug')))
+        {
+            $slug = new Slug([
+                'item_id' => $recipe->id,
+                'item_type' => get_class($recipe),
+                'title' => $request->get('slug')
+            ]);
+
+            $slug->save();
+        }
 
         if (!empty($request->get('recipe_box_type_id')))
         {
@@ -60,7 +63,10 @@ class RecipeService
 
 		if (!empty($request->get('slug')))
 		{
-			$recipe->slug->delete();
+            if ($recipe->slug)
+            {
+			    $recipe->slug->delete();
+            }
 
 	        $slug = new Slug([
 	            'item_id' => $recipe->id,
@@ -68,26 +74,31 @@ class RecipeService
 	            'title' => $request->get('slug')
 	        ]);
 	        $slug->save();
+            $recipe->load('slug');
 	    }
 
 	    if (!empty($request->get('recipe_box_type_id')))
         {
         	$recipe->recipeBoxTypes()->sync($request->get('recipe_box_type_id'));
+            $recipe->load('recipeBoxTypes');
         }
 
         if (!empty($request->get('recipe_equipment_id')))
         {
         	$recipe->recipeEquipments()->sync($request->get('recipe_equipment_id'));
+            $recipe->load('recipeEquipments');
         }
 
         if (!empty($request->get('recipe_cuisine_id')))
         {
         	$recipe->recipeCuisines()->sync($request->get('recipe_cuisine_id'));
+            $recipe->load('recipeCuisines');
         }
 
         if (!empty($request->get('recipe_diet_type_id')))
         {
         	$recipe->recipeDietTypes()->sync($request->get('recipe_diet_type_id'));
+            $recipe->load('recipeDietTypes');
         }
 
         return true;
@@ -95,11 +106,14 @@ class RecipeService
 
 	public function delete(Recipe $recipe, Request $request) : bool
 	{
-		$result = $recipe->delete();
+        if ($recipe->slug)
+            $recipe->slug->delete();
+        
+        foreach($recipe->reviews as $review)
+        {
+            $review->delete();
+        }
 
-		if (!$result)
-			return false;
-
-		return true;
+		return $recipe->delete();
 	}
 }

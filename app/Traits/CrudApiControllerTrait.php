@@ -5,14 +5,22 @@ namespace App\Traits;
 use Illuminate\Http\Request;
 use App\Services\ApiService;
 
+use App\Exceptions\ClassNotFoundException;
+
 use App\Base;
 
 trait CrudApiControllerTrait
 {
     public function index(Request $request, \Closure $callback = null)
     {
+        if (!isset($this->modelClass) || !class_exists($this->modelClass))
+            throw new ClassNotFoundException();
+
+        if (!isset($this->transformerClass) || !class_exists($this->transformerClass))
+            throw new ClassNotFoundException();
+
         // create instance of the Querybuilder for given model
-        $builder = static::$modelClass::query();
+        $builder = $this->modelClass::query();
         
         // chain additional constraints based upon needs
         if ($callback) {
@@ -23,39 +31,46 @@ trait CrudApiControllerTrait
 
         // use api service to transform output
         $apiService = new ApiService();
-        return $apiService->transform($models, new static::$transformerClass());
+        return $apiService->transform($models, new $this->transformerClass());
     }
 
     public function show(Base $model, Request $request)
     {
+        if (!isset($this->transformerClass) || !class_exists($this->transformerClass))
+            throw new ClassNotFoundException();
+
         // use api service to transform output
         $apiService = new ApiService();
-        return $apiService->transform($model, new static::$transformerClass());
+        return $apiService->transform($model, new $this->transformerClass());
     }
 
     public function store(Request $request, \Closure $callback = null)
     {
+        if (!isset($this->modelClass) || !class_exists($this->modelClass))
+            throw new ClassNotFoundException();
+
         // if service can be used to handle given model, use it
-        if (!empty(static::$serviceClass) && class_exists(static::$serviceClass) && method_exists(static::$serviceClass, 'store'))
+        if (isset($this->serviceClass) && class_exists($this->serviceClass) && method_exists($this->serviceClass, 'store'))
         {
-            $service = new static::$serviceClass();
-            $model = new static::$modelClass($request->all());
+            $service = new $this->serviceClass();
+            $model = new $this->modelClass($request->all());
 
             $result = $service->store($model, $request);
         }
         // otherwise use default model operations
         else
         {
-            $model = new static::$modelClass($request->all());
+            $model = new $this->modelClass($request->all());
 
             $result = $model->save();
         }
 
         // chain additional operations based upon needs
-        if (!empty($callback) && $result) {
-            $result = $callback($model, $request);
+        if (!empty($callback)) {
+            $result = $callback($model, $request, $result);
         }
 
+        // use api service to transform output
         return response()->json($result ? [
             'message' => sprintf("%s %s has been successfully saved", $model->singular, $model->id)
         ] : [
@@ -65,10 +80,13 @@ trait CrudApiControllerTrait
 
     public function update(Base $model, Request $request, \Closure $callback = null)
     {
+        if (!isset($this->modelClass) || !class_exists($this->modelClass))
+            throw new ClassNotFoundException();
+
         // if service can be used to handle given model, use it
-        if (!empty(static::$serviceClass) && class_exists(static::$serviceClass) && method_exists(static::$serviceClass, 'update'))
+        if (isset($this->serviceClass) && class_exists($this->serviceClass) && method_exists($this->serviceClass, 'update'))
         {
-            $service = new static::$serviceClass();
+            $service = new $this->serviceClass();
             
             $result = $service->update($model, $request);
         }
@@ -84,8 +102,8 @@ trait CrudApiControllerTrait
         }
 
         // chain additional operations based upon needs
-        if (!empty($callback) && $result) {
-            $result = $callback($model, $request);
+        if (!empty($callback)) {
+            $result = $callback($model, $request, $result);
         }
             
         return response()->json($result ? [
@@ -97,10 +115,13 @@ trait CrudApiControllerTrait
 
     public function destroy(Base $model, Request $request, \Closure $callback = null)
     {
+        if (!isset($this->modelClass) || !class_exists($this->modelClass))
+            throw new ClassNotFoundException();
+
         // if service can be used to handle given model, use it
-        if (!empty(static::$serviceClass) && class_exists(static::$serviceClass) && method_exists(static::$serviceClass, 'delete'))
+        if (isset($this->serviceClass) && class_exists($this->serviceClass) && method_exists($this->serviceClass, 'delete'))
         {
-            $service = new static::$serviceClass();
+            $service = new $this->serviceClass();
             
             $result = $service->delete($model, $request);
         }
@@ -111,8 +132,8 @@ trait CrudApiControllerTrait
         }
 
         // chain additional operations based upon needs
-        if (!empty($callback) && $result) {
-            $result = $callback($model, $request);
+        if (!empty($callback)) {
+            $result = $callback($model, $request, $result);
         }
             
         return response()->json($result ? [

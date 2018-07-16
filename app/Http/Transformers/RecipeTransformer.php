@@ -16,29 +16,16 @@ class RecipeTransformer extends TransformerAbstract
 
     public function transform(Recipe $recipe) : array
     {
-        $return = [
-            'id' => $recipe->id,
-            'title' => $recipe->title,
-            'short_title' => $recipe->short_title,
-            'marketing_description' => $recipe->marketing_description,
-            'calories_kcal' => $recipe->calories_kcal,
-            'protein_grams' => $recipe->protein_grams, 
-            'fat_grams' => $recipe->fat_grams, 
-            'carbs_grams' => $recipe->carbs_grams, 
-            'bulletpoint1' => $recipe->bulletpoint1, 
-            'bulletpoint2' => $recipe->bulletpoint2, 
-            'bulletpoint3' => $recipe->bulletpoint3, 
-            'season' => $recipe->season, 
-            'base' => $recipe->base, 
-            'protein_source' => $recipe->protein_source, 
-            'preparation_time_minutes' => $recipe->preparation_time_minutes, 
-            'shelf_life_days' => $recipe->shelf_life_days,
-            'origin_country' => $recipe->origin_country,
-            'in_your_box' => $recipe->in_your_box, 
-            'gousto_reference' => $recipe->gousto_reference,
-            'created_at' => $recipe->created_at->format("d/m/Y H:i:s"),
-            'updated_at' => $recipe->updated_at->format("d/m/Y H:i:s"),
-        ];
+        $return = [];
+
+        foreach($recipe->getFillable() as $key) {
+            if (!is_null($recipe->{$key})) {
+                $return[$key] = $recipe->{$key};
+            }
+        }
+
+        $return['created_at'] = $recipe->created_at->format("d/m/Y H:i:s");
+        $return['updated_at'] = $recipe->updated_at->format("d/m/Y H:i:s");
 
         if ($recipe->recipeBoxTypes->count() > 0)
         {

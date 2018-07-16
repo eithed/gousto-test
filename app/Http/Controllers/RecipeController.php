@@ -19,9 +19,9 @@ use App\Traits\CrudApiControllerTrait;
 
 class RecipeController extends ApiController
 {
-    static public $modelClass = Recipe::class;
-    static public $transformerClass = RecipeTransformer::class;
-    static public $serviceClass = RecipeService::class;
+    public $modelClass = Recipe::class;
+    public $transformerClass = RecipeTransformer::class;
+    public $serviceClass = RecipeService::class;
 
     // use traits to get around signature conflict issue
     use CrudApiControllerTrait {
@@ -62,7 +62,7 @@ class RecipeController extends ApiController
         return $this->__destroy($recipe, $request);
     }
 
-    public function rate(Recipe $recipe, RecipeReviewRequest $request, ReviewService $reviewService)
+    public function review(Recipe $recipe, RecipeReviewRequest $request, ReviewService $reviewService)
     {
         $review = new Review($request->all());
         $result = $reviewService->store($review, $recipe, $request);
