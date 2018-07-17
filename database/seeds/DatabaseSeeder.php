@@ -97,6 +97,7 @@ class DatabaseSeeder extends Seeder
                 'item_id' => $recipe->id,
                 'title' => $slug
             ]);
+            $slug->save();
         }
     }
 }
