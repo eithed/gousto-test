@@ -74,8 +74,3 @@ I think the approaches I've used make the application easily extendable - adding
 - creating controller that uses CrudApiControllerTrait, with model extending Base class
 - creating service if extended functionality is required
 - if index/show output is required - creating transformer
-
-# Additions
-
-- unit tests
-- integration tests
